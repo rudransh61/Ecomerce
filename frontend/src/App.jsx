@@ -1,28 +1,28 @@
-// App.js
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import ProductList from './components/ProductList';
-import ProductDetails from './components/ProductDetails';
-import Cart from './components/Cart';
-import Checkout from './components/Checkout';
+import React, { useState } from 'react';
+import Cart from './components/Cart/Cart';
+import ProductList from './components/Product/Product';
+import NoPage from './components/Page/NoPage';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
+  // State for total number of items
+  const [totalItems, setTotalItems] = useState([]);
+  
+  // State for cart items
+  const [cartItems, setCartItems] = useState([]);
+
   return (
-    <Router>
-      <div className="App">
-        <Header />
+    <>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ProductList />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart/>} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/" element={<ProductList products={cartItems} />}>
+            <Route path="/cart" element={<Cart cartItems={cartItems} />} />
+            <Route path="*" element={<NoPage />} />
+          </Route>
         </Routes>
-      </div>
-    </Router>
+      </BrowserRouter>
+    </>
   );
 }
 
 export default App;
-
-
