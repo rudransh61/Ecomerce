@@ -1,29 +1,49 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv'); // Add dotenv for managing environment variables
-const app = express();
-const PORT = process.env.PORT || 5000;
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
-// Load environment variables from .env file
-dotenv.config();
+const app = express();
 
 app.use(express.json());
+app.use(cors());
 
-// MongoDB connection setup
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(error => console.error('Error connecting to MongoDB: ', error));
+mongoose.connect('mongodb://127.0.0.1:27017/ecomerce', { useNewUrlParser: true }).then(()=>{console.log("DB connected")})
+const userSchema = new mongoose.Schema({
+  email:  String ,
+  password: String,
+});
 
-// Define product schema and model (similar to previous steps)
+const User = mongoose.model('User', userSchema);
 
-// Import and use product routes
-const productRoutes = require('./routes/productRoutes');
-app.use('/api/products', productRoutes);
+app.post('/signin', async (req, res) => {
+  const { email, password } = req.body;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  try {
+    // Check if user with the provided email already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // If user already exists, return a response indicating that
+      return res.status(409).json({ message: 'User already exists' });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user with the provided email and hashed password
+    await User.create({ email, password: hashedPassword });
+
+    // Send a response with the redirect URL
+    res.status(200).json({ redirectUrl: 'http://localhost:5173/login' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
