@@ -11,8 +11,15 @@ app.use(cors());
 
 mongoose.connect('mongodb://127.0.0.1:27017/ecomerce', { useNewUrlParser: true }).then(()=>{console.log("DB connected")})
 const userSchema = new mongoose.Schema({
-  email:  String ,
+  email: String,
   password: String,
+  cart: [{
+    name: String,
+    price: {
+      type: Number,
+      default: 0.0
+    }
+  }]
 });
 
 const User = mongoose.model('User', userSchema);
@@ -30,10 +37,10 @@ app.post('/signin', async (req, res) => {
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user with the provided email and hashed password
-    await User.create({ email, password: hashedPassword });
+    await User.create({ email, password: password });
 
     // Send a response with the redirect URL
     res.status(200).json({ redirectUrl: 'http://localhost:5173/login' });
@@ -42,6 +49,39 @@ app.post('/signin', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find the user with the provided email
+    const user = await User.findOne({ email });
+
+    // If user doesn't exist, return an error
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordValid = password === user.password;
+
+    // If passwords don't match, return an error
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // If credentials are valid, generate a JWT token containing the user's email
+    const token = jwt.sign({ email: user.email }, 'your_secret_key', { expiresIn: '1h' });
+
+    // Return the token as a response
+    res.status(200).json({ token, redirectUrl: 'http://localhost:5173/' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 
 app.listen(3000, () => {

@@ -1,16 +1,35 @@
 import React, { useState } from 'react';
 
 const Login = () => {
-  // State for username and password
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  // Function to handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // You can add your login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+    try {
+      const response = await fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        console.log(data)
+        setError(data.message);
+      } else {
+        // Login successful, handle redirection or other actions
+        console.log('Login successful');
+        const data = await response.json();
+        console.log(data)
+        window.location.href = data.redirectUrl;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Internal server error');
+    }
   };
 
   return (
@@ -18,13 +37,14 @@ const Login = () => {
       <h1 className="text-3xl font-semibold mb-4">Login</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-          <input type="text" id="username" name="username" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          <input type="text" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
           <input type="password" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
         </div>
+        {error && <p className="text-red-500">{error}</p>}
         <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md">Login</button>
       </form>
     </div>
