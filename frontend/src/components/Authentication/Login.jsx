@@ -17,13 +17,11 @@ const Login = () => {
       });
       if (!response.ok) {
         const data = await response.json();
-        console.log(data)
         setError(data.message);
       } else {
-        // Login successful, handle redirection or other actions
-        console.log('Login successful');
         const data = await response.json();
         console.log(data)
+        localStorage.setItem('token', data.token); // Store token in local storage
         window.location.href = data.redirectUrl;
       }
     } catch (error) {

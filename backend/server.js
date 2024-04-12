@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect('mongodb://127.0.0.1:27017/ecomerce', { useNewUrlParser: true }).then(()=>{console.log("DB connected")})
+mongoose.connect('mongodb://127.0.0.1:27017/ecomerce', { useNewUrlParser: true }).then(() => { console.log("DB connected") })
 const userSchema = new mongoose.Schema({
   email: String,
   password: String,
@@ -72,6 +72,7 @@ app.post('/login', async (req, res) => {
 
     // If credentials are valid, generate a JWT token containing the user's email
     const token = jwt.sign({ email: user.email }, 'your_secret_key', { expiresIn: '1h' });
+
 
     // Return the token as a response
     res.status(200).json({ token, redirectUrl: 'http://localhost:5173/' });
