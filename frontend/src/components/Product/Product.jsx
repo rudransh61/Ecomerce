@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../Header/Header';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
-import "core-js/stable/atob"
 
 const ProductList = ({ products }) => {
   const [email, setEmail] = useState('');
@@ -9,17 +8,33 @@ const ProductList = ({ products }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      console.log(token)
-      // Decode the token to extract the email
-      const decodedToken = jwtDecode(token,{header:true});
-      console.log(decodedToken)
+      const decodedToken = jwtDecode(token);
       const userEmail = decodedToken.email;
       setEmail(userEmail);
     } else {
       // Redirect to login if token is not present
       window.location.href = '/login';
     }
-  }, []); // Empty dependency array ensures this effect runs only once on mount
+  }, []);
+
+  const addToCart = async (productName, productPrice) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/add-to-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: { email, productName, productPrice },
+      });
+      const data = await response.json();
+      console.log(data.message); // Log success message or handle response accordingly
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error
+    }
+  };
 
   return (
     <>
@@ -33,7 +48,12 @@ const ProductList = ({ products }) => {
             <div key={product.id} className="bg-white rounded-lg shadow-md p-4">
               <h2 className="text-lg font-semibold">{product.name}</h2>
               <p className="text-gray-600">Price: ${product.price}</p>
-              <button className="mt-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md">Add to Cart</button>
+              <button
+                onClick={() => addToCart(product.name, product.price)} // Add onClick event handler
+                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+              >
+                Add to Cart
+              </button>
             </div>
           ))}
         </div>

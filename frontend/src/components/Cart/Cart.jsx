@@ -1,8 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 
-const Cart = ({ cartItems }) => {
-  // Calculate total price
-  const totalPrice = cartItems.reduce((total, item) => total + item.price, 0);
+const Cart = () => {
+  const [cartItems, setCartItems] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      const userEmail = decodedToken.email;
+      fetchCartItems(userEmail);
+    } else {
+      // Redirect to login if token is not present
+      window.location.href = '/login';
+    }
+  }, []);
+
+  const fetchCartItems = async (email) => {
+    try {
+      const response = await fetch(`http://localhost:3000/get-cart-items?email=${email}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data.cartItems);
+        calculateTotalPrice(data.cartItems);
+        console.log(data.cartItems)
+      } else {
+        console.error('Error fetching cart items:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const calculateTotalPrice = (items) => {
+    const total = items.reduce((acc, item) => acc + item.price, 0);
+    setTotalPrice(total);
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -12,9 +51,8 @@ const Cart = ({ cartItems }) => {
       ) : (
         <div>
           <ul>
-            {/* Render each cart item */}
             {cartItems.map(item => (
-              <li key={item.id}>
+              <li key={cartItems.indexOf(item)+1}>
                 <div>{item.name}</div>
                 <div>Price: ${item.price}</div>
               </li>

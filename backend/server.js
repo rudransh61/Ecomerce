@@ -49,7 +49,6 @@ app.post('/signin', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,14 +72,58 @@ app.post('/login', async (req, res) => {
     // If credentials are valid, generate a JWT token containing the user's email
     const token = jwt.sign({ email: user.email }, 'your_secret_key', { expiresIn: '1h' });
 
-
-    // Return the token as a response
-    res.status(200).json({ token, redirectUrl: 'http://localhost:5173/' });
+    // Return the token and user's name as a response
+    res.status(200).json({ token, redirectUrl: 'http://localhost:5173/', name: user.name, email: user.email });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+app.post('/add-to-cart', async (req, res) => {
+  const { email, itemName, itemPrice } = req.body;
+  console.log(email,itemName,itemPrice)
+  try {
+    // Find the user with the provided email
+    const user = await User.findOne({ email });
+
+    // If user doesn't exist, return an error
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Add the item to the user's cart
+    user.cart.push({ name: String(itemName), price: itemPrice });
+    await user.save();
+
+    // Return success response
+    res.status(200).json({ message: 'Item added to cart successfully' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+app.get('/get-cart-items', async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    // Find the user with the provided email
+    const user = await User.findOne({ email });
+
+    // If user doesn't exist, return an error
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Return the user's cart items
+    res.status(200).json({ cartItems: user.cart });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 
 

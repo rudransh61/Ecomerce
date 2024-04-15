@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate  } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({ setToken }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const history = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,9 +22,10 @@ const Login = () => {
         setError(data.message);
       } else {
         const data = await response.json();
-        console.log(data)
-        localStorage.setItem('token', data.token); // Store token in local storage
-        window.location.href = data.redirectUrl;
+        localStorage.setItem('token', data.token);
+        setToken(data.token);
+        // history(data.redirectUrl);
+        window.location.href = '/';
       }
     } catch (error) {
       console.error('Error:', error);
