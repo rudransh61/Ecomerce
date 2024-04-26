@@ -3,6 +3,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const paypal = require('@paypal/checkout-server-sdk');
+
+const clientId = 'YOUR_PAYPAL_CLIENT_ID';
+const clientSecret = 'YOUR_PAYPAL_CLIENT_SECRET';
+
+const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+const client = new paypal.core.PayPalHttpClient(environment);
+
 
 const app = express();
 
@@ -79,11 +87,9 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-app.post('/add-to-cart', async (req, res) => {
-  const { email, itemName, itemPrice } = req.body;
-  console.log(email,itemName,itemPrice)
+app.post('/add-to-cart/:email/:itemName/:itemPrice', async (req, res) => {
   try {
+    const { email, itemName, itemPrice } = req.params; // Retrieve parameters from URL params
     // Find the user with the provided email
     const user = await User.findOne({ email });
 
@@ -103,6 +109,7 @@ app.post('/add-to-cart', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 app.get('/get-cart-items', async (req, res) => {
   const { email } = req.query;
 
@@ -123,6 +130,34 @@ app.get('/get-cart-items', async (req, res) => {
   }
 });
 
+app.post('/create-paypal-payment', async (req, res) => {
+  const { itemName, itemPrice } = req.body;
+
+  // Create PayPal order
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.prefer('return=representation');
+  request.requestBody({
+    intent: 'CAPTURE',
+    purchase_units: [{
+      amount: {
+        currency_code: 'USD',
+        value: itemPrice.toString(),
+      },
+      description: itemName,
+    }],
+  });
+
+  try {
+    const response = await client.execute(request);
+    const orderId = response.result.id;
+    const redirectUrl = response.result.links.find(link => link.rel === 'approve').href;
+
+    res.json({ orderId, redirectUrl });
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 

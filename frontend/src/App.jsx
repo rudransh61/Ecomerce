@@ -5,6 +5,8 @@ import ProductList from './components/Product/Product';
 import NoPage from './components/Page/NoPage';
 import LogIn from './components/Authentication/Login';
 import SignIn from './components/Authentication/SignIn';
+import ProductDetails from './components/Product/ProductDetail'; // Import ProductDetails component
+
 
 function App() {
   // State for token
@@ -37,6 +39,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<ProtectedRoute element={<ProductList products={products} />} />} />
+        <Route path="/product/:id" element={<ProtectedRoute element={<ProductDetails products={products}/>} />} /> {/* New route for product details */}
         <Route path="/cart" element={<ProtectedRoute element={<Cart />} />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<LogIn setToken={setToken} />} />
