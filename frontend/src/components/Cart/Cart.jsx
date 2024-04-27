@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
+// import Link  from 'react';
+import { Link } from 'react-router-dom';
 
-const Cart = () => {
+
+const Cart = ({ products }) => {
+  // console.log(product)
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
 
@@ -51,12 +55,24 @@ const Cart = () => {
       ) : (
         <div>
           <ul>
-            {cartItems.map(item => (
-              <li key={cartItems.indexOf(item)+1}>
-                <div>{item.name}</div>
-                <div>Price: ${item.price}</div>
-              </li>
-            ))}
+            {cartItems.map(item => {
+              // Find the product with the same name as the current item
+              const product = products.find(({prod}) => prod.name == item.name);
+
+              // Check if a matching product is found
+              if (product) {
+                return (
+                  <li key={cartItems.indexOf(item) + 1}>
+                    <div>{item.name}</div>
+                    <div>Price: ${item.price}</div>
+                    {/* Use the product's ID in the Link */}
+                    <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">
+                      Read More...
+                    </Link>
+                  </li>
+                );
+              } 
+            })}
           </ul>
           <div className="mt-4">
             Total Price: ${totalPrice.toFixed(2)}

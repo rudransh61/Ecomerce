@@ -40,7 +40,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ProtectedRoute element={<ProductList products={products} />} />} />
         <Route path="/product/:id" element={<ProtectedRoute element={<ProductDetails products={products}/>} />} /> {/* New route for product details */}
-        <Route path="/cart" element={<ProtectedRoute element={<Cart />} />} />
+        <Route path="/cart" element={<ProtectedRoute element={<Cart product={products}/>} />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<LogIn setToken={setToken} />} />
         <Route path="*" element={<NoPage />} />
