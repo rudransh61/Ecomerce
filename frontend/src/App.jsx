@@ -33,7 +33,8 @@ function App() {
     { id: 1, name: "Shirt", price: 1 },
     { id: 2, name: "Car", price: 10 },
     { id: 3, name: "Jeans", price: 4 }
-  ];
+];
+
 
   return (
     <BrowserRouter>

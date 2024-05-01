@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 import { Link } from 'react-router-dom';
 
 
-const Cart = ({ products }) => {
+const Cart = ({ products =[] }) => {
   // console.log(product)
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -47,6 +47,15 @@ const Cart = ({ products }) => {
     setTotalPrice(total);
   };
 
+  function findProductIdByName(productName) {
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].name === productName) {
+          return products[i].id;
+      }
+  }
+  return null; 
+}
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-semibold mb-4">Shopping Cart</h1>
@@ -57,21 +66,29 @@ const Cart = ({ products }) => {
           <ul>
             {cartItems.map(item => {
               // Find the product with the same name as the current item
-              const product = products.find(({prod}) => prod.name == item.name);
+              // let product;
+              // for (let i = 0; i < products?.length; i++) {
+              //   if (products[i].name === item.name) {
+              //     product = products[i];
+              //     break;
+              //   }
+              // }
+
 
               // Check if a matching product is found
-              if (product) {
+              // if (product) {
                 return (
                   <li key={cartItems.indexOf(item) + 1}>
                     <div>{item.name}</div>
                     <div>Price: ${item.price}</div>
                     {/* Use the product's ID in the Link */}
-                    <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">
+                    <Link to={`/product/${products.find((name)=>{name==item.name})}`} className="mt-2 block text-blue-500">
                       Read More...
                     </Link>
                   </li>
                 );
-              } 
+              // }
+
             })}
           </ul>
           <div className="mt-4">
