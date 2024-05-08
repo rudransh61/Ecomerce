@@ -1,3 +1,5 @@
+// ProductList.js
+
 import React, { useEffect, useState } from 'react';
 import Header from '../Header/Header';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
@@ -6,7 +8,42 @@ import { Link } from 'react-router-dom';
 const ProductList = ({ products }) => {
   const [email, setEmail] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [filter, setFilter] = useState({ name: '', minPrice: '', maxPrice: '' });
+  const [filter, setFilter] = useState({ name: '', minPrice: '', maxPrice: '', category: '' });
+  const [cartItems, setCartItems] = useState([]); 
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      const userEmail = decodedToken.email;
+      fetchCartItems(userEmail);
+    } else {
+      // Redirect to login if token is not present
+      window.location.href = '/login';
+    }
+  }, []);
+
+  const fetchCartItems = async (email) => {
+    try {
+      const response = await fetch(`http://localhost:3000/get-cart-items?email=${email}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data.cartItems);
+        // calculateTotalPrice(data.cartItems);
+        console.log(data.cartItems)
+      } else {
+        console.error('Error fetching cart items:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -31,12 +68,16 @@ const ProductList = ({ products }) => {
     // Filter products based on filter criteria
     const filtered = products.filter(product => {
       const nameMatch = product.name.toLowerCase().includes(filter.name.toLowerCase());
+      const categoryMatch = product.category.some(c =>
+        c.toLowerCase().includes(filter.category.toLowerCase())
+      );
       const minPriceMatch = filter.minPrice === '' || product.price >= parseFloat(filter.minPrice);
       const maxPriceMatch = filter.maxPrice === '' || product.price <= parseFloat(filter.maxPrice);
-      return nameMatch && minPriceMatch && maxPriceMatch;
+      return nameMatch && categoryMatch && minPriceMatch && maxPriceMatch;
     });
     setFilteredProducts(filtered);
   }, [filter, products]);
+
   const addToCart = async (productName, productPrice, email) => {
     try {
       const token = localStorage.getItem('token');
@@ -57,8 +98,6 @@ const ProductList = ({ products }) => {
       // Handle error
     }
   };
-  
-  
 
   return (
     <>
@@ -92,6 +131,14 @@ const ProductList = ({ products }) => {
             placeholder="Max price"
             className="mr-2 p-2"
           />
+          <input
+            type="text"
+            name="category"
+            value={filter.category}
+            onChange={handleFilterChange}
+            placeholder="Search by category"
+            className="mr-2 p-2"
+          />
         </form>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map(product => (
@@ -105,6 +152,11 @@ const ProductList = ({ products }) => {
                 Add to Cart
               </button>
               <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">Read More...</Link>
+              <p>Categories : 
+                {product.category.map(c => (
+                    <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>
+                  ))}
+              </p>
             </div>
           ))}
         </div>

@@ -30,9 +30,9 @@ function App() {
 
   // Define your product list
   const products = [
-    { id: 1, name: "Shirt", price: 1 },
-    { id: 2, name: "Car", price: 10 },
-    { id: 3, name: "Jeans", price: 4 }
+    { id: 1, name: "Shirt", price: 1 , category:["Cloths"]},
+    { id: 2, name: "Car", price: 10 , category:["Vehicle"]},
+    { id: 3, name: "Jeans", price: 4 , category :["Cloths","Lower"]}
 ];
 
 
@@ -41,7 +41,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ProtectedRoute element={<ProductList products={products} />} />} />
         <Route path="/product/:id" element={<ProtectedRoute element={<ProductDetails products={products}/>} />} /> {/* New route for product details */}
-        <Route path="/cart" element={<ProtectedRoute element={<Cart product={products}/>} />} />
+        <Route path="/cart" element={<ProtectedRoute element={<Cart products={products}/>} />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<LogIn setToken={setToken} />} />
         <Route path="*" element={<NoPage />} />

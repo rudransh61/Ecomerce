@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 import { Link } from 'react-router-dom';
 
 
-const Cart = ({ products =[] }) => {
+const Cart = ({ products }) => {
   // console.log(product)
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -33,7 +33,7 @@ const Cart = ({ products =[] }) => {
         const data = await response.json();
         setCartItems(data.cartItems);
         calculateTotalPrice(data.cartItems);
-        console.log(data.cartItems)
+        // console.log(data.cartItems)
       } else {
         console.error('Error fetching cart items:', response.statusText);
       }
@@ -63,29 +63,50 @@ const Cart = ({ products =[] }) => {
         <p>Your cart is empty.</p>
       ) : (
         <div>
-          <ul>
+          <ul key="key">
             {cartItems.map(item => {
               // Find the product with the same name as the current item
-              // let product;
-              // for (let i = 0; i < products?.length; i++) {
-              //   if (products[i].name === item.name) {
-              //     product = products[i];
-              //     break;
-              //   }
-              // }
+              let categorylist = []
+              // console.log("Products",products)
+              products.map(prod=>{
+                if(prod.name==item.name){
+                  categorylist = prod.category
+                }
+                // console.log(prod)
+              })
+              // console.log(categorylist)
+              // console.log(item)
+              let itemid;
+              products.map(prod=>{
+                if(prod.name==item.name){
+                  itemid = prod.id
+                }
+                // console.log(prod)
+              })
+              
 
 
               // Check if a matching product is found
               // if (product) {
+                
                 return (
-                  <li key={cartItems.indexOf(item) + 1}>
-                    <div>{item.name}</div>
-                    <div>Price: ${item.price}</div>
-                    {/* Use the product's ID in the Link */}
-                    <Link to={`/product/${products.find((name)=>{name==item.name})}`} className="mt-2 block text-blue-500">
-                      Read More...
-                    </Link>
-                  </li>
+                  
+                    <div key={item.id} className="bg-white rounded-lg shadow-md p-4">
+                      <h2 className="text-lg font-semibold ">{item.name}</h2>
+                      <p className="text-gray-600">Price: ${item.price}</p>
+                      {/* <button
+                        onClick={() => addToCart(item.name, item.price, email)}
+                        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+                      >
+                        Add to Cart
+                      </button> */}
+                      <Link to={`/product/${itemid}`} className="mt-2 block text-blue-500">Read More...</Link>
+                      <p>Categories : 
+                        {categorylist.map(c => (
+                            <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>
+                          ))}
+                      </p>
+                    </div>
                 );
               // }
 
