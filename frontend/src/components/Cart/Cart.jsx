@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode library
 // import Link  from 'react';
 import { Link } from 'react-router-dom';
-
+import Header from '../Header/Header';
 
 const Cart = ({ products }) => {
   // console.log(product)
@@ -57,6 +57,8 @@ const Cart = ({ products }) => {
 }
 
   return (
+    <>
+    <Header/>
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-semibold mb-4">Shopping Cart</h1>
       {cartItems.length === 0 ? (
@@ -121,6 +123,7 @@ const Cart = ({ products }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

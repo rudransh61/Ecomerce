@@ -9,7 +9,8 @@ const ProductList = ({ products }) => {
   const [email, setEmail] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filter, setFilter] = useState({ name: '', minPrice: '', maxPrice: '', category: '' });
-  const [cartItems, setCartItems] = useState([]); 
+  const [cartItems, setCartItems] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -35,7 +36,8 @@ const ProductList = ({ products }) => {
         const data = await response.json();
         setCartItems(data.cartItems);
         // calculateTotalPrice(data.cartItems);
-        console.log(data.cartItems)
+        // console.log("Cart: ",data.cartItems)
+        generateRecommendations(data.cartItems)
       } else {
         console.error('Error fetching cart items:', response.statusText);
       }
@@ -64,6 +66,25 @@ const ProductList = ({ products }) => {
     setFilter({ ...filter, [name]: value });
   };
 
+  const generateRecommendations = (cartItems) => {
+    console.log(cartItems)
+    const listofitems = Object.values(cartItems);
+    
+    console.log(listofitems)
+    // Get categories of items in the cart
+    const categories = Array.from(new Set(listofitems.map(item => item.name)));
+
+  // Filter products based on matching categories
+  const recommendedProducts = products.filter(product =>
+    categories.some(cate => product.category.includes(cate))
+  );
+
+  
+    setRecommendations(recommendedProducts);
+    console.log(recommendedProducts)
+  };
+
+
   useEffect(() => {
     // Filter products based on filter criteria
     const filtered = products.filter(product => {
@@ -82,7 +103,7 @@ const ProductList = ({ products }) => {
     try {
       const token = localStorage.getItem('token');
       const url = `http://localhost:3000/add-to-cart/${encodeURIComponent(email)}/${encodeURIComponent(productName)}/${encodeURIComponent(productPrice)}`;
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -90,7 +111,7 @@ const ProductList = ({ products }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       const data = await response.json();
       console.log(data.message); // Log success message or handle response accordingly
     } catch (error) {
@@ -152,15 +173,33 @@ const ProductList = ({ products }) => {
                 Add to Cart
               </button>
               <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">Read More...</Link>
-              <p>Categories : 
+              <p>Categories :
                 {product.category.map(c => (
-                    <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>
-                  ))}
+                  <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>
+                ))}
               </p>
             </div>
           ))}
         </div>
       </div>
+      <div className="container mx-auto py-8">
+        <h2 className="text-3xl font-semibold mb-4">Recommendations</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recommendations.map(product => (
+            <div key={product.id} className="bg-white rounded-lg shadow-md p-4">
+              <h2 className="text-lg font-semibold">{product.name}</h2>
+              <p className="text-gray-600">Price: ${product.price}</p>
+              <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">Read More...</Link>
+              <p>Categories:
+                {product.category.map(c => (
+                  <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>
+                ))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </>
   );
 };
