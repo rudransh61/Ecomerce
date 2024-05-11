@@ -66,25 +66,90 @@ const ProductList = ({ products }) => {
     setFilter({ ...filter, [name]: value });
   };
 
+  // const generateRecommendations = (cartItems) => {
+  //   // console.log(cartItems)
+  //   const listofitems = Object.values(cartItems);
+
+  //   // console.log(listofitems)
+  //   // Get categories of items in the cart
+  //   //   const categories = Array.from(new Set(listofitems.map(item => item.name)));
+
+  //   // // Filter products based on matching categories
+  //   // const recommendedProducts = products.filter(product =>
+  //   //   categories.some(cate => product.category.includes(cate))
+  //   // );
+  //   let finalList = [];
+  //   let categoryList = [];
+  //   listofitems.map(item => {
+  //     products.map(prod => {
+  //       if (prod.name == item.name) {
+  //         // categorylist = prod.category
+  //         // 
+  //         categoryList.push(...prod.category)
+  //       }
+  //       // console.log(prod)
+  //     })
+  //   })
+  //   // categoryList.filter((item,
+  //   //   index) => categoryList.indexOf(item) === index);
+  //   categoryList = [...new Set(categoryList)]
+  //   // console.log(categoryList)
+
+  //   products.map(product => {
+      
+  //   })
+
+  //   listofitems.map(item => {
+  //     // Find the product with the same name as the current item
+  //     // let categorylist = []
+  //     // console.log("Products",products)
+  //     var IsInCart = false
+  //     products.map(prod => {
+  //       if (prod.name == item.name) {
+  //         // categorylist = prod.category
+  //         IsInCart = true
+  //       }
+  //       // console.log(prod)
+  //     })
+
+  //     if(!IsInCart){
+  //       // if()
+  //       finalList.push(item)
+  //     }
+  //     // console.log("Item:",item)
+  //     console.log(IsInCart)
+  //   })
+
+  //   setRecommendations(finalList);
+  //   // console.log(finalList)
+  // };
+
   const generateRecommendations = (cartItems) => {
-    console.log(cartItems)
     const listofitems = Object.values(cartItems);
-    
-    console.log(listofitems)
-    // Get categories of items in the cart
-    const categories = Array.from(new Set(listofitems.map(item => item.name)));
-
-  // Filter products based on matching categories
-  const recommendedProducts = products.filter(product =>
-    categories.some(cate => product.category.includes(cate))
-  );
-
+    let finalList = [];
+    let categoryList = [];
   
-    setRecommendations(recommendedProducts);
-    console.log(recommendedProducts)
+    // Extract categories of items in the cart
+    listofitems.forEach(item => {
+      const product = products.find(prod => prod.name === item.name);
+      if (product) {
+        categoryList.push(...product.category);
+      }
+    });
+  
+    // Filter out duplicate categories
+    categoryList = [...new Set(categoryList)];
+  
+    // Find products with categories in the category list but not in the cart
+    products.forEach(product => {
+      const isInCart = listofitems.some(item => item.name === product.name);
+      if (!isInCart && product.category.some(cat => categoryList.includes(cat))) {
+        finalList.push(product);
+      }
+    });
+  
+    setRecommendations(finalList);
   };
-
-
   useEffect(() => {
     // Filter products based on filter criteria
     const filtered = products.filter(product => {
@@ -190,6 +255,12 @@ const ProductList = ({ products }) => {
               <h2 className="text-lg font-semibold">{product.name}</h2>
               <p className="text-gray-600">Price: ${product.price}</p>
               <Link to={`/product/${product.id}`} className="mt-2 block text-blue-500">Read More...</Link>
+              <button
+                onClick={() => addToCart(product.name, product.price, email)}
+                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+              >
+                Add to Cart
+              </button>
               <p>Categories:
                 {product.category.map(c => (
                   <span key={c} className="bg-gray-200 px-2 py-1 rounded-md mr-2">{c}</span>

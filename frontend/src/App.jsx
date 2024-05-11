@@ -49,7 +49,10 @@ function App() {
     { id: 17, name: "Gloves", price: 9, category: ["Accessories"] },
     { id: 18, name: "Sweater", price: 18, category: ["Cloths", "Upper"] },
     { id: 19, name: "Pants", price: 10, category: ["Cloths", "Lower"] },
-    { id: 20, name: "Scarf", price: 7, category: ["Accessories"] }
+    { id: 20, name: "Scarf", price: 7, category: ["Accessories"] },
+    { id: 21, name: "Baby Rudin", price: 420, category: ["Books","Study"] },
+    { id: 21, name: "Lamborghini", price: 420, category: ["Vehicle"] },
+    { id: 22, name: "Calculus by Stewart", price: 420, category: ["Books","Study"] }
   ];
 
 
